@@ -2,32 +2,44 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at 00:00 UTC every day
-  workflow_dispatch: # Allows manual triggering
+    - cron: '30 0 * * *' # Runs at 00:30 UTC every day
+  workflow_dispatch: # Allows manual triggering for verification
 
 jobs:
-  build:
+  auto-commit:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Essential for pushing changes
+      contents: write
 
     steps:
+      - name: Workflow Start
+        run: echo "Starting daily automated commit process..."
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensure full history for reliable pushes
 
       - name: Update Data File
         run: |
-          echo "Last updated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> data.txt
+          echo "Logging update for: $(date +'%Y-%m-%d %H:%M:%S')"
+          echo "Last updated: $(date +'%Y-%m-%d %H:%M:%S')" >> data.txt
 
-      - name: Commit and Push Changes
+      - name: Configure Git Identity
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "SSRN Services"
+          git config --global user.email "ssrnservices@gmail.com"
+          echo "Git identity configured for SSRN Services."
+
+      - name: Commit Changes
+        id: commit
+        run: |
           git add data.txt
-          # Check if there are changes before committing
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "chore: daily automated update"
-          git push
+          echo "Attempting to commit changes..."
+          git commit -m "chore: daily automated update" || echo "No changes to commit"
+
+      - name: Push to Main Branch
+        run: |
+          echo "Pushing changes to origin main..."
+          git push origin main
+          echo "Push completed successfully."
