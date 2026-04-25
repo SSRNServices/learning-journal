@@ -16,7 +16,7 @@
   "author": "SSRN Services",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.6.0",
+    "axios": "^1.15.2",
     "express": "^5.2.1"
   }
 }
